@@ -10,7 +10,7 @@ network       = google_compute_network.public_network.name
 }
 
 resource "google_compute_subnetwork" "private-subnetwork" {
-name                     = "public-subnetwork"
+name                     = "private-subnetwork"
 ip_cidr_range            = "10.1.0.0/16"
 region                   = "us-central1"
 network                  = google_compute_network.private_network.name
