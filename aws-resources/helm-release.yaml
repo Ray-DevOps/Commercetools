@@ -1,0 +1,53 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: banned-tags
+  namespace: apps
+spec:
+  chart:
+    spec:
+      chart: microservice
+      version: "0.5.40"
+      sourceRef:
+        kind: HelmRepository
+        name: company-name
+        namespace: flux-system
+  interval: 5m
+  timeout: 10m0s
+  values:
+    image:
+      repository: 999999999999.dkr.ecr.us-east-1.amazonaws.com/banned-tags # {"$imagepolicy": "flux-system:banned-tags:name"}
+      tag: main-1660160127 # {"$imagepolicy": "flux-system:banned-tags:tag"}
+      updateAutomation:
+        enabled: true
+    externalSecret:
+      dataFrom:
+      - staging/service/banned-tags
+    iamRoleArn: "arn:aws:iam::999999999999:role/banned-tags-eks-staging"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 20m
+        memory: 128Mi
+    env:
+    - name: DATABASE_USER
+      valueFrom:
+        secretKeyRef:
+          name: banned-tags
+          key: DATABASE_USER
+    - name: DATABASE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: banned-tags
+          key: DATABASE_PASSWORD
+    - name: DATABASE_URL
+      value: "the-aws-rds-aurora-cluster-url"
+    - name: DATABASE_NAME
+      value: "banned_tags"
+    autoscaler:
+      minPods: 10
+      maxPods: 50
+    deployment:
+      env: staging
